@@ -39,7 +39,9 @@ function createPokemonCard(pokemonData) {
         ${pokemonData.held_items.length > 0 ? `<p>Held Items: ${pokemonData.held_items.map(itemInfo => itemInfo.item.name).join(', ')}</p>` : ''}
     `;
     return pokemonCard;
+
 }
+
 
 // Function to display Pokemon cards (for search results or full list)
 function displayPokemon(pokemonDataArray) {
@@ -131,6 +133,8 @@ fetch(url)
                 .then(pokemonData => {
                     // Store the data for searching
                     allPokemonData.push(pokemonData);
+
+                    console.log(pokemonData);
                     
                     pokemonLoaded++;
                     
@@ -142,8 +146,8 @@ fetch(url)
                         console.log(`Loaded ${totalPokemon} Pokémon!`);
                     }
                 })
+                
                 .catch(error => console.error(`Error fetching ${pokemon.name}:`, error));
         });
     })
     .catch(error => console.error('Error fetching Pokémon data:', error));
-    
