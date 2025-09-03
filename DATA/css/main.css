@@ -1,0 +1,225 @@
+/* Main CSS file for the bootcamp API project */
+
+/*GLOBAL*/
+* {
+  font-family: "Arial", sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #1e1e1e;
+}
+
+/*TAG STYLING*/
+p,
+h2,
+h3 {
+  margin: 10px 0;
+  line-height: 1.5;
+}
+
+button {
+  padding: 4px;
+  border: medium none;
+  border-spacing: 0;
+  font-family: "PT Sans Narrow", sans-serif;
+  font-weight: normal;
+  list-style: none outside none;
+  margin: 0;
+  text-align: left;
+  text-decoration: none;
+  text-indent: 0;
+  background-color: white;
+  transition: all 0.1s ease-in-out;
+}
+
+/*CLASSES/IDS STYLING*/
+#wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  justify-content: center;
+}
+
+#Buttons {
+  position: fixed;
+  color: white;
+  margin: 2em;
+  background-color: #303030;
+  padding: 1em;
+  border-radius: 4px;
+}
+
+.card {
+  color: white;
+  border: 1px solid #636363;
+  border-radius: 8px;
+  padding: 10px;
+  margin: 2em;
+  width: 20em;
+  background-color: #303030;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Prevent background scroll while modal is open */
+.no-scroll {
+  overflow: hidden;
+}
+
+/* Modal layout */
+.modal.hidden {
+  display: none;
+}
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
+/* Backdrop */
+.modal__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Dialog */
+.modal__dialog {
+  position: relative;
+  margin: auto;
+  max-width: 640px;
+  width: calc(100% - 2rem);
+  background: #111; /* dark theme */
+  color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  padding: 1rem 1rem 1.25rem;
+}
+
+/* Close button */
+.modal__close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  border: none;
+  background: transparent;
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #bbb;
+}
+.modal__close:hover {
+  color: #fff;
+}
+
+/* Content */
+.modal__header h3 {
+  margin: 0 2rem 0.75rem 0;
+  font-size: 1.4rem;
+}
+.modal__body {
+  display: grid;
+  gap: 1rem;
+}
+.modal__image {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  display: block;
+}
+.modal__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+.modal__list li strong {
+  margin-right: 0.5rem;
+}
+
+/*BEFORE/AFTER STYLING*/
+.dead::before {
+  content: "●";
+  color: red;
+  font-weight: bold;
+  font-size: 1.5em;
+  position: relative;
+  top: 0;
+  left: 0;
+  padding: 5px;
+}
+
+.alive::before {
+  content: "●";
+  color: green;
+  font-weight: bold;
+  font-size: 1.5em;
+  position: relative;
+  top: 0;
+  left: 0;
+  padding: 5px;
+}
+
+.unknown::before {
+  content: "●";
+  color: rgb(73, 73, 73);
+  font-weight: bold;
+  font-size: 1.5em;
+  position: relative;
+  top: 0;
+  left: 0;
+  padding: 5px;
+}
+
+.humanM::before {
+  content: "🙎‍♂️";
+  font-weight: bold;
+  font-size: 1.5em;
+  position: relative;
+  top: 0;
+  left: 0;
+  padding: 5px;
+}
+
+.humanF::before {
+  content: "🙋🏻‍♀️";
+  font-weight: bold;
+  font-size: 1.5em;
+  position: relative;
+  top: 0;
+  left: 0;
+  padding: 5px;
+}
+
+.alien::before {
+  content: "👽";
+  font-weight: bold;
+  font-size: 1.5em;
+  position: relative;
+  top: 0;
+  left: 0;
+  padding: 5px;
+}
+
+/*EFFECTS*/
+.card:hover {
+  background-color: #404040;
+  border-color: #888;
+  transform: scale(1.02);
+  transition: all 0.3s ease-in-out;
+}
+
+button:active {
+  background-color: #3f3f3f;
+  transform: scale(0.9);
+}
+
+.card {
+  transition: all 0.3s ease-in-out;
+}
