@@ -131,6 +131,8 @@ fetch(url)
                 .then(pokemonData => {
                     // Store the data for searching
                     allPokemonData.push(pokemonData);
+
+                    console.log(pokemonData)
                     
                     pokemonLoaded++;
                     
