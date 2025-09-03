@@ -8,6 +8,7 @@ const nextButton = document.getElementById('next-button');
 const pageInfo = document.getElementById('pageInfo');
 const searchInput = document.getElementById('searchInput');
 const searchButton = document.getElementById('searchButton');
+let currentAudio = null;
 
 // Function to update page info and button states
 function updateNavigation() {
@@ -16,12 +17,46 @@ function updateNavigation() {
     nextButton.disabled = currentIndex === pokemonCards.length - 1;
 }
 
+// Function to play Pokemon cry sound
+function playPokemonCry(pokemonData) {
+    // Stop any currently playing audio
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+    }
+    
+    // Try to play the cry sound
+    if (pokemonData.cries && pokemonData.cries.latest) {
+        currentAudio = new Audio(pokemonData.cries.latest);
+        currentAudio.volume = 0.3; // Set volume to 30% to not be too loud
+        
+        currentAudio.play().catch(error => {
+            console.log(`Could not play cry for ${pokemonData.name}:`, error);
+            // Try fallback to legacy cry if latest doesn't work
+            if (pokemonData.cries.legacy) {
+                currentAudio = new Audio(pokemonData.cries.legacy);
+                currentAudio.volume = 0.3;
+                currentAudio.play().catch(fallbackError => {
+                    console.log(`Could not play legacy cry for ${pokemonData.name}:`, fallbackError);
+                });
+            }
+        });
+    } else {
+        console.log(`No cry sound available for ${pokemonData.name}`);
+    }
+}
+
 // Function to show only one Pokemon at a time
 function showPokemon(index) {
     pokemonCards.forEach((card, i) => {
         card.style.display = i === index ? 'block' : 'none';
     });
     updateNavigation();
+    
+    // Play the cry sound for the current Pokemon
+    if (allPokemonData[index]) {
+        playPokemonCry(allPokemonData[index]);
+    }
 }
 
 // Function to create a Pokemon card element
