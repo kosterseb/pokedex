@@ -10,6 +10,39 @@ const searchInput = document.getElementById('searchInput');
 const searchButton = document.getElementById('searchButton');
 let currentAudio = null;
 
+// Function to get type sprite from PokéAPI
+async function getTypeSprite(typeName) {
+    try {
+        const response = await fetch(`https://pokeapi.co/api/v2/type/${typeName.toLowerCase()}`);
+        const typeData = await response.json();
+        return typeData.sprites['generation-viii']['sword-shield'].name_icon || null;
+    } catch (error) {
+        console.log(`Could not fetch sprite for type ${typeName}:`, error);
+        return null;
+    }
+}
+
+// Function to create type badges with sprites from API
+async function createTypeBadges(types) {
+    const typeBadges = await Promise.all(types.map(async (typeInfo) => {
+        const typeName = typeInfo.type.name;
+        const spriteUrl = await getTypeSprite(typeName);
+        
+        if (spriteUrl) {
+            return `<div class="type-badge" data-type="${typeName}">
+                        <img src="${spriteUrl}" alt="${typeName}" class="type-sprite">
+                    </div>`;
+        } else {
+            // Fallback to text-only badge if no sprite available
+            return `<div class="type-badge" data-type="${typeName}">
+                        <span class="type-name">${typeName}</span>
+                    </div>`;
+        }
+    }));
+    
+    return typeBadges.join('');
+}
+
 // Function to update page info and button states
 function updateNavigation() {
     pageInfo.textContent = `${currentIndex + 1} / ${pokemonCards.length}`;
@@ -60,13 +93,18 @@ function showPokemon(index) {
 }
 
 // Function to create a Pokemon card element
-function createPokemonCard(pokemonData) {
+async function createPokemonCard(pokemonData) {
     const pokemonCard = document.createElement('div');
     pokemonCard.classList.add('pokemon-card');
+    
+    const typeBadgesHtml = await createTypeBadges(pokemonData.types);
+    
     pokemonCard.innerHTML = `
         <img src="${pokemonData.sprites.front_default}" alt="${pokemonData.name}">
         <h3>#${pokemonData.id} ${pokemonData.name.charAt(0).toUpperCase() + pokemonData.name.slice(1)}</h3>
-        <p>Type: ${pokemonData.types.map(typeInfo => typeInfo.type.name).join(', ')}</p>
+        <div class="types-container">
+            ${typeBadgesHtml}
+        </div>
         <p>Height: ${pokemonData.height / 10}m</p>
         <p>Weight: ${pokemonData.weight / 10}kg</p>
         <p>Base Experience: ${pokemonData.base_experience}</p>
@@ -74,22 +112,20 @@ function createPokemonCard(pokemonData) {
         ${pokemonData.held_items.length > 0 ? `<p>Held Items: ${pokemonData.held_items.map(itemInfo => itemInfo.item.name).join(', ')}</p>` : ''}
     `;
     return pokemonCard;
-
 }
 
-
 // Function to display Pokemon cards (for search results or full list)
-function displayPokemon(pokemonDataArray) {
+async function displayPokemon(pokemonDataArray) {
     // Clear current display
     pokemonContainer.innerHTML = '';
     pokemonCards.length = 0;
     
     // Create and add cards
-    pokemonDataArray.forEach(pokemonData => {
-        const card = createPokemonCard(pokemonData);
+    for (const pokemonData of pokemonDataArray) {
+        const card = await createPokemonCard(pokemonData);
         pokemonContainer.appendChild(card);
         pokemonCards.push(card);
-    });
+    }
     
     // Reset to first Pokemon and show it
     currentIndex = 0;
@@ -103,10 +139,10 @@ function displayPokemon(pokemonDataArray) {
 }
 
 // Search function
-function searchPokemon(query) {
+async function searchPokemon(query) {
     if (!query.trim()) {
         // If empty search, show all Pokemon
-        displayPokemon(allPokemonData);
+        await displayPokemon(allPokemonData);
         return;
     }
     
@@ -118,7 +154,7 @@ function searchPokemon(query) {
         return matchesName || matchesId;
     });
     
-    displayPokemon(filteredPokemon);
+    await displayPokemon(filteredPokemon);
 }
 
 // Navigation event listeners
