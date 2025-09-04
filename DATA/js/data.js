@@ -33,6 +33,8 @@ fetch(API_Pokemon)
     });
   });
 
+// Fetches evolution chain for the first 151 Pokemon, although some evolutions weren't introduced until later generations
+// We'll have to figure out what to do with those extra evolutions
 fetch(API_Evolve)
   .then((response) => response.json())
   .then((data) => {
@@ -57,8 +59,3 @@ fetch(API_Evolve)
       EvolutionDataGlobal = allEvolutionData;
     });
   });
-
-function testAll() {
-  console.log(pokemonDataGlobal);
-  console.log(EvolutionDataGlobal);
-}
