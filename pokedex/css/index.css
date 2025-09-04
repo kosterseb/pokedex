@@ -16,6 +16,10 @@ h1 {
     margin-bottom: 40px;
 }
 
+.container {
+    z-index: 10;
+}
+
 .type-badge img {
 width: 30%;
 }
