@@ -2,9 +2,11 @@ let offset = 0;
 
 let API_Pokemon = `https://pokeapi.co/api/v2/pokemon?offset=${offset}&limit=151`;
 
-let API_Evolve = `https://pokeapi.co/api/v2/evolution-chain`;
+let API_Evolve = `https://pokeapi.co/api/v2/evolution-chain?offset=${offset}&limit=78`;
 
 let pokemonDataGlobal;
+
+let EvolutionDataGlobal;
 
 // ------------ FETCHING ALL API DATA ----------- //
 
@@ -31,6 +33,32 @@ fetch(API_Pokemon)
     });
   });
 
+fetch(API_Evolve)
+  .then((response) => response.json())
+  .then((data) => {
+    console.log(data.results.map((evolve) => evolve.url));
+
+    // Get all URLS
+    let EvolveUrls = data.results.map((evolve) => evolve.url);
+
+    let allEvolutionData = [];
+
+    // get data from each Evolution URL
+    let fetchPromises = EvolveUrls.map((url) =>
+      fetch(url)
+        .then((response) => response.json())
+        .then((EvolveData) => {
+          allEvolutionData.push(EvolveData);
+        })
+    );
+    // Set the global EvolutionData variable to the an array of all Evolutions
+    Promise.all(fetchPromises).then(() => {
+      // Now we can call it globally
+      EvolutionDataGlobal = allEvolutionData;
+    });
+  });
+
 function testAll() {
-  console.log(pokemonDataGlobal[0].cries.latest);
+  console.log(pokemonDataGlobal);
+  console.log(EvolutionDataGlobal);
 }
