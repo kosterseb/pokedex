@@ -2,56 +2,341 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
 }
 
-h1 {
+body {
+    background: url('https://wallpapers.com/images/featured/pokemon-landscape-yf5odhgkds0n53yl.jpg');
+    background-size: cover;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: auto;
+    padding: 20px;
+}
+
+.book-container {
+    position: relative;
+    z-index: 1;
+}
+
+.book {
+    position: relative;
+    width: 600px;
+    height: 400px;
+    bottom: 100px;
+    left: 100px;
+    perspective: 1200px;
+    transform-style: preserve-3d;
+}
+
+.cover, .page {
+    position: absolute;
+    width: 450px;
+    height: 600px;
+    transform-origin: left center;
+    transition: transform 0.8s ease-in-out;
+    border-radius: 0 30px 10px 0;
+    cursor: pointer;
+}
+
+.cover {
+    background: linear-gradient(45deg, #f51c1c, #f41e17);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
     text-align: center;
-    margin: 40px 0;
+    padding: 20px;
 }
 
+.cover h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.cover p {
+    font-size: 1.2em;
+    opacity: 0.9;
+}
+
+.page {
+    background: linear-gradient(to right, #f8f9fa 0%, #ffffff 100%);
+    box-shadow: inset -2px 0 5px rgba(0,0,0,0.1), 0 5px 20px rgba(0,0,0,0.2);
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.page1 {
+    z-index: 3;
+}
+
+.page2 {
+    z-index: 2;
+    background: linear-gradient(to right, #e8f4f8 0%, #f0f8ff 100%);
+}
+
+.page3 {
+    z-index: 1;
+    background: linear-gradient(to right, #f0f8e8 0%, #f8fff0 100%);
+}
+
+/* Page flip states */
+.cover.flipped {
+    transform: rotateY(-180deg);
+}
+
+.page1.flipped {
+    transform: rotateY(-180deg);
+}
+
+.page2.flipped {
+    transform: rotateY(-180deg);
+}
+
+.page3.flipped {
+    transform: rotateY(-180deg);
+}
+
+/* Search interface styling */
 .search-container {
+    margin-bottom: 20px;
     display: flex;
-    justify-content: center;
-    margin-bottom: 40px;
-}
-
-.container {
-    z-index: 10;
-}
-
-.type-badge img {
-width: 30%;
-}
-
-#pagination {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
     gap: 10px;
 }
 
-#pagination button {
-    padding: 10px 15px;
-    border: none;
-    background-color: #007bff;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-bottom: 20px;
+#searchInput {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 25px;
+    outline: none;
+    font-size: 14px;
+    transition: border-color 0.3s;
 }
 
-button:disabled {
-    opacity: 0.5;
+#searchInput:focus {
+    border-color: #667eea;
+}
+
+#searchButton {
+    padding: 12px 20px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+#searchButton:hover {
+    background: #5a67d8;
+}
+
+/* Pokemon card styling */
+.pokemon-card {
+    background: white;
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    text-align: center;
+    margin-bottom: 15px;
+    transition: transform 0.3s ease;
+}
+
+.pokemon-card:hover {
+    transform: translateY(-2px);
+}
+
+.pokemon-card img {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 10px;
+}
+
+.pokemon-card h3 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 1.3em;
+}
+
+.types-container {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin: 10px 0;
+    flex-wrap: wrap;
+}
+
+.type-badge {
+    color: white;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.8em;
+    text-transform: capitalize;
+}
+
+.type-badge img {
+    width: 116px;
+    height: 30px;
+    vertical-align: middle;
+    margin-right: 4px;
+}
+
+.pokemon-info {
+    font-size: 0.9em;
+    color: #666;
+    margin: 5px 0;
+}
+
+/* Navigation styling */
+.navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.nav-button {
+    padding: 8px 15px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background 0.3s;
+}
+
+.nav-button:hover:not(:disabled) {
+    background: #5a67d8;
+}
+
+.nav-button:disabled {
+    background: #ccc;
     cursor: not-allowed;
 }
 
-.pokemon-card {
-    border: 1px solid #ddd;
-    padding: 20px;
-    border-radius: 8px;
+.page-info {
+    font-weight: bold;
+    color: #667eea;
+}
+
+/* Welcome page styling */
+.welcome-content {
     text-align: center;
-    max-width: 400px;
-    margin: 0 auto;
+    padding: 20px 0;
+}
+
+.welcome-content h2 {
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.welcome-content p {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.start-button {
+    padding: 15px 30px;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: transform 0.3s;
+}
+
+.start-button:hover {
+    transform: scale(1.05);
+}
+
+/* Page tabs */
+.page-tabs {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 10;
+}
+
+.page-tab {
+    width: 30px;
+    height: 40px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+    font-size: 0.8em;
+    transition: all 0.3s;
+    writing-mode: vertical-lr;
+    text-orientation: mixed;
+}
+
+.page-tab:hover {
+    width: 35px;
+    background: #5a67d8;
+}
+
+.page-tab.active {
+    background: #ee5a24;
+    width: 35px;
+}
+
+/* Loading spinner */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    flex-direction: column;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .book {
+        width: 500px;
+        height: 350px;
+    }
+    
+    .cover, .page {
+        width: 250px;
+        height: 350px;
+    }
+    
+    .cover h1 {
+        font-size: 2em;
+    }
+    
+    .page-tabs {
+        right: -35px;
+    }
 }

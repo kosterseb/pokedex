@@ -1,16 +1,45 @@
-const url = 'https://pokeapi.co/api/v2/pokemon?limit=151';
-const pokemonContainer = document.getElementById('pokemon-container');
-let currentIndex = 0;
-const pokemonCards = [];
-const allPokemonData = []; // Store all Pokemon data for searching
-const prevButton = document.getElementById('prev-button');
-const nextButton = document.getElementById('next-button');
-const pageInfo = document.getElementById('pageInfo');
-const searchInput = document.getElementById('searchInput');
-const searchButton = document.getElementById('searchButton');
+// Global variables
+let currentPage = 0;
+let currentPokemonIndex = 0;
+let pokemonData = [];
+let filteredPokemon = [];
 let currentAudio = null;
 
-// Function to get type sprite from PokéAPI
+// Page navigation
+const pages = ['cover', 'page1', 'page2', 'page3'];
+const tabs = document.querySelectorAll('.page-tab');
+
+function goToPage(pageIndex) {
+    // Remove active class from current tab
+    tabs[currentPage].classList.remove('active');
+    
+    // Update current page
+    currentPage = pageIndex;
+    
+    // Add active class to new tab
+    tabs[currentPage].classList.add('active');
+
+    // Handle page flipping animation
+    pages.forEach((pageId, index) => {
+        const element = document.getElementById(pageId);
+        if (index <= pageIndex) {
+            element.classList.add('flipped');
+        } else {
+            element.classList.remove('flipped');
+        }
+    });
+}
+
+// Add click events to cover and pages for navigation
+document.getElementById('cover').addEventListener('click', () => goToPage(0));
+document.getElementById('page1').addEventListener('click', () => goToPage(1));
+document.getElementById('page2').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('page2')) {
+        goToPage(2);
+    }
+});
+
+// Pokemon API functions
 async function getTypeSprite(typeName) {
     try {
         const response = await fetch(`https://pokeapi.co/api/v2/type/${typeName.toLowerCase()}`);
@@ -22,7 +51,6 @@ async function getTypeSprite(typeName) {
     }
 }
 
-// Function to create type badges with sprites from API
 async function createTypeBadges(types) {
     const typeBadges = await Promise.all(types.map(async (typeInfo) => {
         const typeName = typeInfo.type.name;
@@ -30,12 +58,10 @@ async function createTypeBadges(types) {
         
         if (spriteUrl) {
             return `<div class="type-badge" data-type="${typeName}">
-                        <img src="${spriteUrl}" alt="${typeName}" class="type-sprite">
+                        <img src="${spriteUrl}" alt="${typeName}">
                     </div>`;
         } else {
-            // Fallback to text-only badge if no sprite available
             return `<div class="type-badge" data-type="${typeName}">
-                        <span class="type-name">${typeName}</span>
                     </div>`;
         }
     }));
@@ -43,182 +69,183 @@ async function createTypeBadges(types) {
     return typeBadges.join('');
 }
 
-// Function to update page info and button states
-function updateNavigation() {
-    pageInfo.textContent = `${currentIndex + 1} / ${pokemonCards.length}`;
-    prevButton.disabled = currentIndex === 0;
-    nextButton.disabled = currentIndex === pokemonCards.length - 1;
-}
-
-// Function to play Pokemon cry sound
-function playPokemonCry(pokemonData) {
-    // Stop any currently playing audio
+function playPokemonCry(pokemon) {
     if (currentAudio) {
         currentAudio.pause();
         currentAudio.currentTime = 0;
     }
     
-    // Try to play the cry sound
-    if (pokemonData.cries && pokemonData.cries.latest) {
-        currentAudio = new Audio(pokemonData.cries.latest);
-        currentAudio.volume = 0.3; // Set volume to 30% to not be too loud
+    if (pokemon.cries && pokemon.cries.latest) {
+        currentAudio = new Audio(pokemon.cries.latest);
+        currentAudio.volume = 0.3;
         
         currentAudio.play().catch(error => {
-            console.log(`Could not play cry for ${pokemonData.name}:`, error);
-            // Try fallback to legacy cry if latest doesn't work
-            if (pokemonData.cries.legacy) {
-                currentAudio = new Audio(pokemonData.cries.legacy);
+            console.log(`Could not play cry for ${pokemon.name}:`, error);
+            if (pokemon.cries.legacy) {
+                currentAudio = new Audio(pokemon.cries.legacy);
                 currentAudio.volume = 0.3;
                 currentAudio.play().catch(fallbackError => {
-                    console.log(`Could not play legacy cry for ${pokemonData.name}:`, fallbackError);
+                    console.log(`Could not play legacy cry for ${pokemon.name}:`, fallbackError);
                 });
             }
         });
-    } else {
-        console.log(`No cry sound available for ${pokemonData.name}`);
     }
 }
 
-// Function to show only one Pokemon at a time
-function showPokemon(index) {
-    pokemonCards.forEach((card, i) => {
-        card.style.display = i === index ? 'block' : 'none';
-    });
-    updateNavigation();
+async function createPokemonCard(pokemon, isDetailed = false) {
+    const typeBadgesHtml = await createTypeBadges(pokemon.types);
     
-    // Play the cry sound for the current Pokemon
-    if (allPokemonData[index]) {
-        playPokemonCry(allPokemonData[index]);
-    }
-}
-
-// Function to create a Pokemon card element
-async function createPokemonCard(pokemonData) {
-    const pokemonCard = document.createElement('div');
-    pokemonCard.classList.add('pokemon-card');
+    const card = document.createElement('div');
+    card.classList.add('pokemon-card');
+    card.style.cursor = 'pointer';
     
-    const typeBadgesHtml = await createTypeBadges(pokemonData.types);
-    
-    pokemonCard.innerHTML = `
-        <img src="${pokemonData.sprites.front_default}" alt="${pokemonData.name}">
-        <h3>#${pokemonData.id} ${pokemonData.name.charAt(0).toUpperCase() + pokemonData.name.slice(1)}</h3>
+    card.innerHTML = `
+        <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" loading="lazy">
+        <h3>#${pokemon.id.toString().padStart(3, '0')} ${pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)}</h3>
         <div class="types-container">
             ${typeBadgesHtml}
         </div>
-        <p>Height: ${pokemonData.height / 10}m</p>
-        <p>Weight: ${pokemonData.weight / 10}kg</p>
-        <p>Base Experience: ${pokemonData.base_experience}</p>
-        <p>Abilities: ${pokemonData.abilities.map(abilityInfo => abilityInfo.ability.name).join(', ')}</p>
-        ${pokemonData.held_items.length > 0 ? `<p>Held Items: ${pokemonData.held_items.map(itemInfo => itemInfo.item.name).join(', ')}</p>` : ''}
+        <div class="pokemon-info">Height: ${pokemon.height / 10}m</div>
+        <div class="pokemon-info">Weight: ${pokemon.weight / 10}kg</div>
+        <div class="pokemon-info">Base Experience: ${pokemon.base_experience || 'Unknown'}</div>
+        ${isDetailed ? `
+            <div class="pokemon-info">Abilities: ${pokemon.abilities.map(a => a.ability.name).join(', ')}</div>
+            ${pokemon.held_items.length > 0 ? `<div class="pokemon-info">Held Items: ${pokemon.held_items.map(i => i.item.name).join(', ')}</div>` : ''}
+            <div class="pokemon-info">Stats:</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin: 10px 0; font-size: 0.8em;">
+                ${pokemon.stats.map(stat => `
+                    <div>${stat.stat.name}: ${stat.base_stat}</div>
+                `).join('')}
+            </div>
+        ` : '<div style="margin-top: 10px; font-size: 0.9em; color: #667eea;">Click for details →</div>'}
     `;
-    return pokemonCard;
+    
+    card.addEventListener('click', () => {
+        playPokemonCry(pokemon);
+        if (!isDetailed) {
+            showDetailedView(pokemon);
+            goToPage(2);
+        }
+    });
+    
+    return card;
 }
 
-// Function to display Pokemon cards (for search results or full list)
-async function displayPokemon(pokemonDataArray) {
-    // Clear current display
-    pokemonContainer.innerHTML = '';
-    pokemonCards.length = 0;
+async function showDetailedView(pokemon) {
+    const detailedContainer = document.getElementById('detailed-view');
+    detailedContainer.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading details...</p></div>';
     
-    // Create and add cards
-    for (const pokemonData of pokemonDataArray) {
-        const card = await createPokemonCard(pokemonData);
-        pokemonContainer.appendChild(card);
-        pokemonCards.push(card);
-    }
+    const detailedCard = await createPokemonCard(pokemon, true);
+    detailedContainer.innerHTML = '';
+    detailedContainer.appendChild(detailedCard);
+}
+
+function updateNavigation() {
+    const pageInfo = document.getElementById('pageInfo');
+    const prevButton = document.getElementById('prev-button');
+    const nextButton = document.getElementById('next-button');
     
-    // Reset to first Pokemon and show it
-    currentIndex = 0;
-    if (pokemonCards.length > 0) {
-        showPokemon(0);
-    } else {
+    if (filteredPokemon.length === 0) {
         pageInfo.textContent = 'No Pokémon found';
         prevButton.disabled = true;
         nextButton.disabled = true;
-    }
-}
-
-// Search function
-async function searchPokemon(query) {
-    if (!query.trim()) {
-        // If empty search, show all Pokemon
-        await displayPokemon(allPokemonData);
         return;
     }
     
-    const searchTerm = query.toLowerCase().trim();
-    const filteredPokemon = allPokemonData.filter(pokemon => {
-        // Search by name or ID
-        const matchesName = pokemon.name.toLowerCase().includes(searchTerm);
-        const matchesId = pokemon.id.toString() === searchTerm;
-        return matchesName || matchesId;
-    });
-    
-    await displayPokemon(filteredPokemon);
+    pageInfo.textContent = `${currentPokemonIndex + 1} / ${filteredPokemon.length}`;
+    prevButton.disabled = currentPokemonIndex === 0;
+    nextButton.disabled = currentPokemonIndex === filteredPokemon.length - 1;
 }
 
-// Navigation event listeners
-prevButton.addEventListener('click', () => {
-    if (currentIndex > 0) {
-        currentIndex--;
-        showPokemon(currentIndex);
+async function displayPokemon(index = currentPokemonIndex) {
+    const container = document.getElementById('pokemon-container');
+    
+    if (filteredPokemon.length === 0) {
+        container.innerHTML = '<p style="text-align: center; margin: 50px 0; color: #666;">No Pokémon found. Try a different search term.</p>';
+        updateNavigation();
+        return;
+    }
+    
+    const pokemon = filteredPokemon[index];
+    container.innerHTML = '';
+    
+    const card = await createPokemonCard(pokemon);
+    container.appendChild(card);
+    
+    currentPokemonIndex = index;
+    updateNavigation();
+}
+
+function searchPokemon(query) {
+    if (!query.trim()) {
+        filteredPokemon = [...pokemonData];
+    } else {
+        const searchTerm = query.toLowerCase().trim();
+        filteredPokemon = pokemonData.filter(pokemon => {
+            const matchesName = pokemon.name.toLowerCase().includes(searchTerm);
+            const matchesId = pokemon.id.toString() === searchTerm;
+            return matchesName || matchesId;
+        });
+    }
+    
+    currentPokemonIndex = 0;
+    displayPokemon(0);
+}
+
+// Event listeners
+document.getElementById('prev-button').addEventListener('click', () => {
+    if (currentPokemonIndex > 0) {
+        displayPokemon(currentPokemonIndex - 1);
     }
 });
 
-nextButton.addEventListener('click', () => {
-    if (currentIndex < pokemonCards.length - 1) {
-        currentIndex++;
-        showPokemon(currentIndex);
+document.getElementById('next-button').addEventListener('click', () => {
+    if (currentPokemonIndex < filteredPokemon.length - 1) {
+        displayPokemon(currentPokemonIndex + 1);
     }
 });
 
-// Search event listeners
-searchButton.addEventListener('click', () => {
-    const query = searchInput.value;
+document.getElementById('searchButton').addEventListener('click', () => {
+    const query = document.getElementById('searchInput').value;
     searchPokemon(query);
 });
 
-searchInput.addEventListener('keypress', (e) => {
+document.getElementById('searchInput').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
-        const query = searchInput.value;
+        const query = e.target.value;
         searchPokemon(query);
     }
 });
 
-// Real-time search as user types (optional - you can remove this if you prefer only search on button click/enter)
-searchInput.addEventListener('input', () => {
-    const query = searchInput.value;
+document.getElementById('searchInput').addEventListener('input', (e) => {
+    const query = e.target.value;
     searchPokemon(query);
 });
 
-// Load all Pokemon data
-fetch(url)
-    .then(response => response.json())
-    .then(data => {
-        let pokemonLoaded = 0;
-        const totalPokemon = data.results.length;
+// Load Pokemon data
+async function loadPokemonData() {
+    try {
+        const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=151');
+        const data = await response.json();
         
-        data.results.forEach((pokemon, index) => {
-            fetch(pokemon.url)
-                .then(response => response.json())
-                .then(pokemonData => {
-                    // Store the data for searching
-                    allPokemonData.push(pokemonData);
-
-                    console.log(pokemonData);
-                    
-                    pokemonLoaded++;
-                    
-                    // When all Pokemon are loaded, display them
-                    if (pokemonLoaded === totalPokemon) {
-                        // Sort by ID to maintain proper order
-                        allPokemonData.sort((a, b) => a.id - b.id);
-                        displayPokemon(allPokemonData);
-                        console.log(`Loaded ${totalPokemon} Pokémon!`);
-                    }
-                })
-                
-                .catch(error => console.error(`Error fetching ${pokemon.name}:`, error));
+        const promises = data.results.map(async (pokemon) => {
+            const pokemonResponse = await fetch(pokemon.url);
+            return await pokemonResponse.json();
         });
-    })
-    .catch(error => console.error('Error fetching Pokémon data:', error));
+        
+        pokemonData = await Promise.all(promises);
+        pokemonData.sort((a, b) => a.id - b.id);
+        
+        filteredPokemon = [...pokemonData];
+        await displayPokemon(0);
+        
+        console.log(`Loaded ${pokemonData.length} Pokémon!`);
+    } catch (error) {
+        console.error('Error loading Pokémon data:', error);
+        document.getElementById('pokemon-container').innerHTML = 
+            '<p style="text-align: center; color: #ff6b6b; margin: 50px 0;">Error loading Pokémon data. Please try again later.</p>';
+    }
+}
+
+// Initialize the app
+loadPokemonData();

@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
   <link rel="stylesheet" type="text/css" href="/pokedex/css/index.css">
-  <link rel="stylesheet" type="text/css" href="/pokedex/css/pokedex.css">
+  <!-- <link rel="stylesheet" type="text/css" href="/pokedex/css/pokedex.css"> -->
   <title>PokéBax | Pokédex</title>
 </head>
 
@@ -16,40 +16,67 @@
   <main>
 
 
-    <div class="container">
-        <h1>PokéBax</h1>
-        <div class="search-container">
-          <input type="text" id="searchInput" placeholder="Search Pokémon by name or ID...">
-          <button id="searchButton">Search</button>
-        </div>
-      </div>
-      <div id="pokemon-container"></div>
-      <div id="pagination">
-        <button id="prev-button">Previous</button>
-        <span id="pageInfo"></span>
-        <button id="next-button">Next</button>
-      </div>
-    </div>
-
     <div class="book-container">
       <div class="book">
-        <input type="checkbox" name="page1" id="page1">
-        <input type="checkbox" name="page2" id="page2">
-        <input type="checkbox" name="page3" id="page3">
-        <input type="checkbox" name="page4" id="page4">
-        <div class="pages">
-          <div class="page1">
-            <label for="page1"></label>
+        <!-- Cover -->
+        <div class="cover" id="cover">
+        </div>
+
+        <!-- Page 1: Welcome/Instructions -->
+        <div class="page page1" id="page1">
+          <div class="welcome-content">
+            <h2>Welcome to PokéBax!</h2>
+            <p>Your interactive digital Pokédex is ready to explore the world of Pokémon!</p>
+            <p><strong>How to use:</strong></p>
+            <ul style="text-align: left; margin: 15px 0; padding-left: 30px;">
+              <li>Navigate through pages using the buttons below</li>
+              <li>Search for Pokémon by name or number</li>
+              <li>Click on Pokémon to hear their cries</li>
+              <li>Use the tabs on the right to jump between sections</li>
+            </ul>
+            <button class="start-button" onclick="goToPage(2)">Start Exploring!</button>
           </div>
-          <div class="page2">
-            <label for="page2"></label>
         </div>
-        <div class="page3">
-          <label for="page3"></label>
+
+        <!-- Page 2: Pokemon Search & Display -->
+        <div class="page page2" id="page2">
+          <h2 style="margin-bottom: 15px; color: #333;">Pokémon Database</h2>
+          <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search Pokémon by name or ID...">
+            <button id="searchButton">Search</button>
+          </div>
+
+          <div id="pokemon-container">
+            <div class="loading">
+              <div class="spinner"></div>
+              <p>Loading Pokémon data...</p>
+            </div>
+          </div>
+
+          <div class="navigation">
+            <button class="nav-button" id="prev-button">Previous</button>
+            <span class="page-info" id="pageInfo">Loading...</span>
+            <button class="nav-button" id="next-button">Next</button>
+          </div>
         </div>
-        <div class="page4">
-          <label for="page4"></label>
+
+        <!-- Page 3: Pokemon Stats & Details -->
+        <div class="page page3" id="page3">
+          <h2 style="margin-bottom: 15px; color: #333;">Detailed View</h2>
+          <div id="detailed-view">
+            <p style="text-align: center; color: #666; margin-top: 50px;">
+              Select a Pokémon from the previous page to view detailed information here.
+            </p>
+          </div>
         </div>
+      </div>
+
+      <!-- Page navigation tabs -->
+      <div class="page-tabs">
+        <button class="page-tab active" onclick="goToPage(0)" title="Cover">📖</button>
+        <button class="page-tab" onclick="goToPage(1)" title="Welcome">🏠</button>
+        <button class="page-tab" onclick="goToPage(2)" title="Search">🔍</button>
+        <button class="page-tab" onclick="goToPage(3)" title="Details">📊</button>
       </div>
     </div>
   </main>
