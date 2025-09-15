@@ -27,6 +27,7 @@ body {
     height: 400px;
     bottom: 100px;
     left: 100px;
+    
     perspective: 1200px;
     transform-style: preserve-3d;
 }
@@ -36,6 +37,7 @@ body {
     width: 450px;
     height: 600px;
     transform-origin: left center;
+    border: 2px solid rgb(255, 153, 0);
     transition: transform 0.8s ease-in-out;
     border-radius: 0 30px 10px 0;
     cursor: pointer;

@@ -225,7 +225,7 @@ document.getElementById('searchInput').addEventListener('input', (e) => {
 // Load Pokemon data
 async function loadPokemonData() {
     try {
-        const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=151');
+        const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=900');
         const data = await response.json();
         
         const promises = data.results.map(async (pokemon) => {
